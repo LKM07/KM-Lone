@@ -1,14 +1,27 @@
 import subprocess
-import os
+
+apps={
+    "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+    "vscode": r"C:\Users\Hi\AppData\Local\Programs\Microsoft VS Code\Code.exe",
+    "steam": r"C:\Program Files (x86)\Steam\steam.exe"
+}
 
 while True:
     command=input("You: ")
+    command=command.lower().strip()
+
     if command=="hello":
         print("KM-Lone: Hello! I am KM-Lone. How can I assist you today?")
     elif command=="exit":
         print("KM-Lone: Have a nice day!")
         break
-    elif command=="open chrome":
-        subprocess.Popen(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+    elif command.startswith("open"):
+        app=command.replace("open", "", 1).strip()
+
+        if app in apps:
+            print(f"KM-Lone: Opening {app}...")
+            subprocess.Popen(apps[app])
+        else:
+            print(f"KM-Lone: Sorry, I don't know how to open {app}.")
     else:
         print("KM-Lone: I'm sorry, I don't understand. Please try again.")
