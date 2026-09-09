@@ -8,6 +8,14 @@ from material_search import (
     format_material_report,
     search_materials,
 )
+from material_summary import (
+    SummaryError,
+    extract_summary_target,
+    format_summary,
+    resolve_material,
+    summarise_material,
+    terminal_text,
+)
 
 apps={
     "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
@@ -22,18 +30,44 @@ def main():
         enable_debug_logging()
         print("KM-Lone: Debug logging is enabled in km_lone_debug.log.")
 
+    last_report = None
+    summary_cache = {}
+
     while True:
-        raw_command=input("You: ").strip()
+        try:
+            raw_command = input("You: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nKM-Lone: Have a nice day!")
+            break
         command=raw_command.lower()
+        summary_target = extract_summary_target(raw_command)
+        if summary_target is not None:
+            try:
+                material = resolve_material(summary_target, last_report)
+                if material.url not in summary_cache:
+                    print("KM-Lone: Reading the selected material...")
+                    summary_cache[material.url] = summarise_material(material)
+                print(format_summary(summary_cache[material.url]))
+            except SummaryError as error:
+                print(f"KM-Lone: {error}")
+            except KeyboardInterrupt:
+                print("\nKM-Lone: Summary cancelled. You can enter another command.")
+            continue
+
         material_topic = extract_material_topic(raw_command)
 
         if material_topic:
+            # A new search replaces the numbered list, including on zero results.
+            last_report = None
+            summary_cache.clear()
             report = search_materials(material_topic)
-            print(format_material_report(report))
+            last_report = report
+            print(terminal_text(format_material_report(report)))
         elif command=="hello":
             print("KM-Lone: Hello! I am KM-Lone. How can I assist you today?")
         elif command=="help":
-            print('KM-Lone: Try "open chrome" or "search materials about neural networks".')
+            print('KM-Lone: Try "open chrome", "search materials about neural networks", '
+                  '"summarise 3", or "summarise <displayed URL>". Use "exit" to leave.')
         elif command=="exit":
             print("KM-Lone: Have a nice day!")
             break

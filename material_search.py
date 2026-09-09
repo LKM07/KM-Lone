@@ -163,13 +163,16 @@ def format_material_report(report: SearchReport) -> str:
 
     if report.recent:
         lines.extend(("", "Newest published"))
-        lines.extend(_format_item(index, material) for index, material in enumerate(report.recent, start=1))
+        lines.extend(_format_item(index, material) for index, material in enumerate(report.recent, start=len(report.popular) + 1))
 
     if not report.popular and not report.recent:
         lines.extend(("", "No public results were returned. Try a more specific topic."))
 
     if report.sources_used:
         lines.extend(("", f"Sources used: {', '.join(report.sources_used)}."))
+
+    if report.popular or report.recent:
+        lines.extend(("", "To summarise a result: summarise 3  (or summarise <displayed URL>)"))
 
     if report.errors:
         lines.extend(("", "Some sources were unavailable: " + "; ".join(report.errors)))
