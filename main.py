@@ -16,6 +16,7 @@ from material_summary import (
     summarise_material,
     terminal_text,
 )
+from voice_input import VoiceError, VoiceInput, list_microphones, setup_voice
 
 apps={
     "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
@@ -32,6 +33,8 @@ def main():
 
     last_report = None
     summary_cache = {}
+    voice = VoiceInput()
+    print('KM-Lone: Type a command, or enter "voice" to speak. Use "help" for examples.')
 
     while True:
         try:
@@ -40,6 +43,24 @@ def main():
             print("\nKM-Lone: Have a nice day!")
             break
         command=raw_command.lower()
+        if command in {"voice", "voice en", "voice zh", "voice auto", "voice devices", "voice setup"}:
+            try:
+                if command == "voice devices":
+                    print(terminal_text(list_microphones()))
+                    continue
+                if command == "voice setup":
+                    setup_voice()
+                    continue
+                language = command.split()[1] if command in {"voice en", "voice zh"} else None
+                raw_command = voice.listen(language)
+                print(f"You (voice): {terminal_text(raw_command)}")
+                command = raw_command.lower()
+            except VoiceError as error:
+                print(f"KM-Lone: {error}")
+                continue
+            except KeyboardInterrupt:
+                print("\nKM-Lone: Voice cancelled. You can type or try again.")
+                continue
         summary_target = extract_summary_target(raw_command)
         if summary_target is not None:
             try:
@@ -67,7 +88,9 @@ def main():
             print("KM-Lone: Hello! I am KM-Lone. How can I assist you today?")
         elif command=="help":
             print('KM-Lone: Try "open chrome", "search materials about neural networks", '
-                  '"summarise 3", or "summarise <displayed URL>". Use "exit" to leave.')
+                  '"summarise 3", or "summarise <displayed URL>". '
+                  'Use "voice" (auto), "voice en" or "voice zh" to speak; '
+                  '"voice devices" lists microphones, "voice setup" downloads the model. Use "exit" to leave.')
         elif command=="exit":
             print("KM-Lone: Have a nice day!")
             break

@@ -239,7 +239,7 @@ class TerminalFlowTests(unittest.TestCase):
         self.assertEqual(output.getvalue().count("Summary of Selected item 6"), 2)
         self.assertIn("Search for materials first", output.getvalue())
         self.assertIn("Hello! I am KM-Lone", output.getvalue())
-        self.assertEqual(input_fn.call_args.args, ("你： ",))
+        self.assertEqual(input_fn.call_args.args, ("You: ",))
 
     def test_failed_summary_does_not_exit_or_cache_failure(self):
         commands = ["search neural networks", "summarise 1", "summarise 1", "exit"]
